@@ -2,8 +2,11 @@ import streamlit as st
 from typing import List, Tuple
 import pyarrow.lib as _lib
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
-google_api_key = "AIzaSyC8inE9pKkOlqXSd41oYb37jvYcHuyVzsM"  # Replace with your actual API key
+google_api_key = os.getenv("GOOGLE_API_KEY")
+
 import google.generativeai as genai
 
 genai.configure(api_key=google_api_key)
