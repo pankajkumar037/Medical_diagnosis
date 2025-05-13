@@ -40,22 +40,17 @@ class PatientInfo(BaseModel):
     age: int
     gender: str
     symptoms: str
-    # Add session_id to the model if you intend to use it from the client
-    # If session_id is generated server-side, you'll handle it differently
-    # session_id: str # Uncomment if session_id comes from the client
-
-
+ 
 @app.post("/symptom")
 async def submit_symptom(patient: PatientInfo):
     try:
         symptoms = hybrid_symptom_extraction(patient.symptoms)
 
-        # Generate a simple session ID for demonstration if not provided by client
-        # In a real application, you'd use a more robust session management
+       
         import uuid
-        session_id = str(uuid.uuid4()) # Generate a unique ID
+        session_id = str(uuid.uuid4()) 
 
-        # Store patient data in session
+       
         session_store[session_id] = {
             "name": patient.name, 
             "age": patient.age,
@@ -69,7 +64,7 @@ async def submit_symptom(patient: PatientInfo):
         print(f"Error processing symptom submission: {e}")
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
 
-# You might want to add an endpoint to retrieve session data for testing
+
 @app.get("/session/{session_id}")
 async def get_session_data(session_id: str):
     if session_id not in session_store:
@@ -92,7 +87,7 @@ async def followup_question(websocket: WebSocket, session_id: str):
         chat_history = session["chat_history"]
         question_count = session.get("question_count", 0)
 
-        # Send first question immediately
+        
         if question_count == 0:
             response = get_followup_for_diagnosis(age, gender, symptoms, chat_history)
             if isinstance(response, dict) and "Question" in response:
@@ -112,7 +107,7 @@ async def followup_question(websocket: WebSocket, session_id: str):
                 await websocket.close()
                 return
 
-        # Handle answers and continue loop
+        
         while True:
             client_msg = await websocket.receive_text()
             client_msg = client_msg.strip().upper()
@@ -120,7 +115,7 @@ async def followup_question(websocket: WebSocket, session_id: str):
             last_response = session.get("last_options", {})
             user_answer = last_response.get(client_msg, client_msg)
 
-            # Append actual option value if valid key
+            
             chat_history.append({"user": user_answer})
 
             response = get_followup_for_diagnosis(age, gender, symptoms, chat_history)

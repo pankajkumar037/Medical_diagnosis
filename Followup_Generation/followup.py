@@ -8,23 +8,17 @@ google_api_key = os.getenv("GOOGLE_API_KEY")
 
 MODEL_NAME = "gemini-2.0-flash"
 
-model_available = False # Initialize availability flag
-model = None # Initialize model object
+model_available = False 
+model = None 
 
 if google_api_key:
     genai.configure(api_key=google_api_key)
     try:
-        # Check if the model is available
+        
         genai.get_model(MODEL_NAME)
         model = genai.GenerativeModel(MODEL_NAME)
         model_available = True
-        # Optional: Configure safety settings here if needed for your application
-        # model.safety_settings = {
-        #     'HARM_CATEGORY_HARASSMENT': 'BLOCK_NONE',
-        #     'HARM_CATEGORY_HATE_SPEECH': 'BLOCK_NONE',
-        #     'HARM_CATEGORY_SEXUALLY_EXPLICIT': 'BLOCK_NONE',
-        #     'HARM_CATEGORY_DANGEROUS_CONTENT': 'BLOCK_NONE',
-        # }
+      
     except Exception as e:
         print(f"Error accessing model {MODEL_NAME}: {e}")
         print("Please check your API key and model name.")
@@ -41,12 +35,12 @@ def get_followup_for_diagnosis(age, gender, symptoms, chat_history):
         None: If an API error occurred, the model is not available, or the
               response was an unexpected format that couldn't be parsed.
     """
-    # Check model availability at the start of the function call
+   
     if not model_available or model is None:
         print("Model is not available. Cannot generate content.")
         return None
 
-    # --- Modified Prompt ---
+    
     prompt = f"""
         You are a top medical diagnosis expert. Your primary goal is to efficiently gather just enough information from the patient to form a likely diagnosis or differential diagnoses. Avoid asking unnecessary or repetitive questions.
 
@@ -80,43 +74,41 @@ def get_followup_for_diagnosis(age, gender, symptoms, chat_history):
 
 
     try:
-        # Generate content
+        
         response = model.generate_content(prompt)
-        raw_response = response.text.strip() # Get the text content and remove leading/trailing whitespace
+        raw_response = response.text.strip() 
 
-        # --- Handling Logic (same as before) ---
-        # 1. Check for the specific "Ready for diagnosis" string
+        
         if raw_response == "Ready for diagnosis":
-            # print("DEBUG: Model returned 'Ready for diagnosis'") # Optional debug print
-            return raw_response # Return the specific string directly
+            return raw_response 
 
-        # 2. Attempt to clean up potential markdown wrapping
+        
         cleaned_res = raw_response
         if cleaned_res.startswith("```json"):
              cleaned_res = cleaned_res[len("```json"):].strip()
         if cleaned_res.endswith("```"):
              cleaned_res = cleaned_res[:-len("```")].strip()
 
-        # 3. Attempt to parse the cleaned response as JSON
+        
         try:
-            # Add a basic check if it looks like JSON before parsing
+            
             if cleaned_res.startswith('{') and cleaned_res.endswith('}'):
                 parsed_json = json.loads(cleaned_res)
-                # print("DEBUG: Model returned valid JSON") # Optional debug print
-                return parsed_json # Return the parsed dictionary if successful
+                
+                return parsed_json
             else:
-                 # It wasn't "Ready for diagnosis" and didn't look like JSON
+                 
                  print(f"Warning: Model returned unexpected format (not 'Ready for diagnosis' and not JSON-like): {raw_response}")
-                 return None # Indicate unexpected format
+                 return None 
 
         except json.JSONDecodeError as e:
-            # Handle cases where it looked like JSON but failed parsing
+            
             print(f"JSONDecodeError: Could not parse response as JSON: {e}")
             print(f"Problematic string was:\n{raw_response}")
-            return None # Indicate parsing failure
+            return None 
 
     except Exception as e:
-        # Catch broader exceptions during content generation (e.g., API errors)
+        
         print(f"An API error occurred during content generation: {e}")
         return None
 
