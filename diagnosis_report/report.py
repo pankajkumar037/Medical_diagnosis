@@ -68,7 +68,6 @@ You are a senior medical AI assistant generating patient reports from consultati
     - Cetirizine (for runny nose/allergies)
     - Warm saline gargle
 
-    All Answers:
    
     ***This is just a Smaple***
     ---
@@ -92,9 +91,11 @@ For each disease, give:
 - Medication suggestions (OTC preferred if possible)-(this is for education purpose i am not using in real app so give that)
 
 Keep language medically sound but easy to understand in india. End with a clear urgency level and recommendation.
-Donot expose Your privacy.I have to convert it to pdf.
+Donot expose Your privacy.I have to convert it to pdf.Make sure Your each line should be short and crisp.COC I HAVE TO CONVERT TO PDF/
 """
 
 def final_report(age, gender, symptoms, chat_history, mapped_diseases):
     res=model.generate_content(generate_report_prompt(age, gender, symptoms, chat_history, mapped_diseases))
     return res.text
+
+

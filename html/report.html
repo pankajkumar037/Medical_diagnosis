@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Medical Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            margin: auto;
+            background-color: #f4f4f9;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .response-message {
+            margin-top: 20px;
+            text-align: center;
+            color: #333;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generate Medical Report</h1>
+    <div class="form-container">
+        <label for="session_id">Enter Session ID</label>
+        <input type="text" id="session_id" placeholder="Enter your session ID">
+        <button onclick="generateReport()">Generate Report</button>
+        <div class="response-message" id="response-message"></div>
+    </div>
+
+    <script>
+        async function generateReport() {
+            const sessionId = document.getElementById("session_id").value.trim();
+            const responseMessage = document.getElementById("response-message");
+
+            if (!sessionId) {
+                responseMessage.textContent = "Please enter a session ID.";
+                responseMessage.style.color = "red";
+                return;
+            }
+
+            try {
+                const response = await fetch(`/generate_report/${sessionId}`);
+
+                if (response.ok) {
+                    // When the report is generated successfully
+                    const data = await response.blob();
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(data);
+                    link.download = "medical_report.pdf";
+                    link.click();
+
+                    responseMessage.textContent = "Report is being downloaded...";
+                    responseMessage.style.color = "green";
+                } else {
+                    const errorData = await response.json();
+                    responseMessage.textContent = errorData.detail || "An error occurred while generating the report.";
+                    responseMessage.style.color = "red";
+                }
+            } catch (error) {
+                responseMessage.textContent = "An error occurred while processing your request.";
+                responseMessage.style.color = "red";
+            }
+        }
+    </script>
+</body>
+</html>
